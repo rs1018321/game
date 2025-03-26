@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏中心</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .game-card {
+            transition: transform 0.2s;
+        }
+        .game-card:hover {
+            transform: scale(1.05);
+        }
+        .category-active {
+            background-color: #3b82f6;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- 顶部导航栏 -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-bold text-gray-800">游戏中心</h1>
+                </div>
+                <div class="flex items-center">
+                    <div class="relative">
+                        <input type="text" id="searchInput" 
+                               class="w-64 px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="搜索游戏...">
+                        <button class="absolute right-2 top-1/2 transform -translate-y-1/2">
+                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容区域 -->
+    <div class="flex max-w-7xl mx-auto px-4 py-6">
+        <!-- 左侧分类导航 -->
+        <div class="w-64 bg-white rounded-lg shadow-md p-4 mr-6">
+            <h2 class="text-lg font-semibold mb-4">游戏分类</h2>
+            <ul class="space-y-2">
+                <li>
+                    <button class="category-btn w-full text-left px-4 py-2 rounded-lg hover:bg-gray-100 category-active" 
+                            data-category="action">
+                        动作游戏
+                    </button>
+                </li>
+                <li>
+                    <button class="category-btn w-full text-left px-4 py-2 rounded-lg hover:bg-gray-100" 
+                            data-category="adventure">
+                        冒险游戏
+                    </button>
+                </li>
+                <li>
+                    <button class="category-btn w-full text-left px-4 py-2 rounded-lg hover:bg-gray-100" 
+                            data-category="sports">
+                        体育游戏
+                    </button>
+                </li>
+                <li>
+                    <button class="category-btn w-full text-left px-4 py-2 rounded-lg hover:bg-gray-100" 
+                            data-category="puzzle">
+                        解谜游戏
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <!-- 右侧游戏展示区域 -->
+        <div class="flex-1">
+            <!-- 游戏列表 -->
+            <div id="gameList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 游戏卡片将通过JavaScript动态添加 -->
+            </div>
+
+            <!-- 游戏iframe容器 -->
+            <div id="gameFrame" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50">
+                <div class="absolute top-4 right-4 z-50">
+                    <button id="closeGame" class="text-white hover:text-gray-300">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="w-full h-full">
+                    <iframe id="gameIframe" 
+                        class="w-full h-full" 
+                        frameborder="0" 
+                        allowfullscreen="true"
+                        webkitallowfullscreen="true" 
+                        mozallowfullscreen="true"
+                        allow="autoplay; fullscreen *; keyboard-controls; gamepad; accelerometer; gyroscope; payment; cross-origin-isolated; clipboard-read; clipboard-write"
+                        scrolling="no"
+                        sandbox="allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation"
+                        style="border: 0; margin: 0; padding: 0;">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 游戏数据示例
+        const games = {
+            action: [
+                { 
+                    name: "Monster Survivors", 
+                    iframe: "https://cloud.onlinegames.io/games/2025/unity/monster-survivors/index-og.html",
+                    image: "https://picsum.photos/400/225"
+                },
+                { 
+                    name: "Shell Shockers", 
+                    iframe: "https://www.crazygames.com/embed/shell-shockers",
+                    image: "https://images.crazygames.com/games/shell-shockers/cover-1686838477160.png"
+                },
+                { 
+                    name: "Puppet Fighter", 
+                    iframe: "https://www.crazygames.com/embed/puppet-fighter-2-player",
+                    image: "https://images.crazygames.com/games/puppet-fighter-2-player/cover-1678641606962.png"
+                },
+                { 
+                    name: "Smash Karts", 
+                    iframe: "https://www.crazygames.com/embed/smash-karts",
+                    image: "https://images.crazygames.com/games/smash-karts/cover-1678641749190.png"
+                },
+                { 
+                    name: "EvoWars.io", 
+                    iframe: "https://www.crazygames.com/embed/evowars-io",
+                    image: "https://images.crazygames.com/games/evowars-io/cover-1678641755432.png"
+                },
+                { 
+                    name: "Zombie Crusher", 
+                    iframe: "https://www.crazygames.com/embed/zombie-crusher",
+                    image: "https://images.crazygames.com/games/zombie-crusher/cover-1686230956660.png"
+                },
+                { 
+                    name: "Dead Land: Survival", 
+                    iframe: "https://www.crazygames.com/embed/dead-land-survival",
+                    image: "https://images.crazygames.com/games/dead-land-survival/cover-1678641755432.png"
+                },
+                { 
+                    name: "Battle Arena", 
+                    iframe: "https://www.crazygames.com/embed/battle-arena",
+                    image: "https://images.crazygames.com/games/battle-arena/cover-1678641755432.png"
+                },
+                { 
+                    name: "Sky Riders", 
+                    iframe: "https://www.crazygames.com/embed/sky-riders",
+                    image: "https://images.crazygames.com/games/sky-riders/cover-1678641755432.png"
+                },
+                { 
+                    name: "Gridpunk", 
+                    iframe: "https://www.crazygames.com/embed/gridpunk",
+                    image: "https://images.crazygames.com/games/gridpunk/cover-1678641755432.png"
+                }
+            ],
+            adventure: [
+                { 
+                    name: "Doors Online", 
+                    iframe: "https://www.crazygames.com/embed/doors-online",
+                    image: "https://images.crazygames.com/games/doors-online/cover-1678641755432.png"
+                },
+                { 
+                    name: "Castle Craft", 
+                    iframe: "https://www.crazygames.com/embed/castle-craft",
+                    image: "https://images.crazygames.com/games/castle-craft/cover-1678641755432.png"
+                },
+                { 
+                    name: "Stronghold Dude", 
+                    iframe: "https://www.crazygames.com/embed/stronghold-dude",
+                    image: "https://images.crazygames.com/games/stronghold-dude/cover-1678641755432.png"
+                },
+                { 
+                    name: "Idle Saga", 
+                    iframe: "https://www.crazygames.com/embed/idle-saga",
+                    image: "https://images.crazygames.com/games/idle-saga/cover-1678641755432.png"
+                },
+                { 
+                    name: "Hex Empire", 
+                    iframe: "https://www.crazygames.com/embed/hex-empire",
+                    image: "https://images.crazygames.com/games/hex-empire/cover-1678641755432.png"
+                },
+                { 
+                    name: "Heroes Assemble", 
+                    iframe: "https://www.crazygames.com/embed/heroes-assemble",
+                    image: "https://images.crazygames.com/games/heroes-assemble/cover-1678641755432.png"
+                },
+                { 
+                    name: "Fleeing the Complex", 
+                    iframe: "https://www.crazygames.com/embed/fleeing-the-complex",
+                    image: "https://images.crazygames.com/games/fleeing-the-complex/cover-1678641755432.png"
+                },
+                { 
+                    name: "Raid Heroes", 
+                    iframe: "https://www.crazygames.com/embed/raid-heroes",
+                    image: "https://images.crazygames.com/games/raid-heroes/cover-1678641755432.png"
+                },
+                { 
+                    name: "Backpack Viking", 
+                    iframe: "https://www.crazygames.com/embed/backpack-viking",
+                    image: "https://images.crazygames.com/games/backpack-viking/cover-1678641755432.png"
+                },
+                { 
+                    name: "Paper Minecraft", 
+                    iframe: "https://www.crazygames.com/embed/paper-minecraft",
+                    image: "https://images.crazygames.com/games/paper-minecraft/cover-1678641755432.png"
+                }
+            ],
+            sports: [
+                { 
+                    name: "8 Ball Billiards Classic", 
+                    iframe: "https://www.crazygames.com/embed/8-ball-billiards-classic",
+                    image: "https://images.crazygames.com/games/8-ball-billiards-classic/cover-1678641755432.png"
+                },
+                { 
+                    name: "Basketball Superstars", 
+                    iframe: "https://www.crazygames.com/embed/basketball-superstars",
+                    image: "https://images.crazygames.com/games/basketball-superstars/cover-1678641755432.png"
+                },
+                { 
+                    name: "Golf Orbit", 
+                    iframe: "https://www.crazygames.com/embed/golf-orbit",
+                    image: "https://images.crazygames.com/games/golf-orbit/cover-1678641755432.png"
+                },
+                { 
+                    name: "Basket Random", 
+                    iframe: "https://www.crazygames.com/embed/basket-random",
+                    image: "https://images.crazygames.com/games/basket-random/cover-1678641755432.png"
+                },
+                { 
+                    name: "Basketball Stars", 
+                    iframe: "https://www.crazygames.com/embed/basketball-stars",
+                    image: "https://images.crazygames.com/games/basketball-stars/cover-1678641755432.png"
+                },
+                { 
+                    name: "Tap-Tap Shots", 
+                    iframe: "https://www.crazygames.com/embed/tap-tap-shots",
+                    image: "https://images.crazygames.com/games/tap-tap-shots/cover-1678641755432.png"
+                },
+                { 
+                    name: "Soccer Legends 2021", 
+                    iframe: "https://www.crazygames.com/embed/soccer-legends-2021",
+                    image: "https://images.crazygames.com/games/soccer-legends-2021/cover-1678641755432.png"
+                },
+                { 
+                    name: "BasketBros", 
+                    iframe: "https://www.crazygames.com/embed/basketbros",
+                    image: "https://images.crazygames.com/games/basketbros/cover-1678641755432.png"
+                },
+                { 
+                    name: "Return Man 2", 
+                    iframe: "https://www.crazygames.com/embed/return-man-2",
+                    image: "https://images.crazygames.com/games/return-man-2/cover-1678641755432.png"
+                },
+                { 
+                    name: "Turbo Stars", 
+                    iframe: "https://www.crazygames.com/embed/turbo-stars",
+                    image: "https://images.crazygames.com/games/turbo-stars/cover-1678641755432.png"
+                }
+            ],
+            puzzle: [
+                { 
+                    name: "Cubes 2048.io", 
+                    iframe: "https://www.crazygames.com/embed/cubes-2048-io",
+                    image: "https://images.crazygames.com/games/cubes-2048-io/cover-1678641755432.png"
+                },
+                { 
+                    name: "Color Fill 3D", 
+                    iframe: "https://www.crazygames.com/embed/color-fill-3d",
+                    image: "https://images.crazygames.com/games/color-fill-3d/cover-1678641755432.png"
+                },
+                { 
+                    name: "Rope Rescue", 
+                    iframe: "https://www.crazygames.com/embed/rope-rescue",
+                    image: "https://images.crazygames.com/games/rope-rescue/cover-1678641755432.png"
+                },
+                { 
+                    name: "Screw Out", 
+                    iframe: "https://www.crazygames.com/embed/screw-out",
+                    image: "https://images.crazygames.com/games/screw-out/cover-1678641755432.png"
+                },
+                { 
+                    name: "Daily Room Escape", 
+                    iframe: "https://www.crazygames.com/embed/daily-room-escape",
+                    image: "https://images.crazygames.com/games/daily-room-escape/cover-1678641755432.png"
+                },
+                { 
+                    name: "Magic World", 
+                    iframe: "https://www.crazygames.com/embed/magic-world",
+                    image: "https://images.crazygames.com/games/magic-world/cover-1678641755432.png"
+                },
+                { 
+                    name: "Slice Master", 
+                    iframe: "https://www.crazygames.com/embed/slice-master",
+                    image: "https://images.crazygames.com/games/slice-master/cover-1678641755432.png"
+                },
+                { 
+                    name: "Gravity Crowd", 
+                    iframe: "https://www.crazygames.com/embed/gravity-crowd",
+                    image: "https://images.crazygames.com/games/gravity-crowd/cover-1678641755432.png"
+                },
+                { 
+                    name: "Matches Craft", 
+                    iframe: "https://www.crazygames.com/embed/matches-craft",
+                    image: "https://images.crazygames.com/games/matches-craft/cover-1678641755432.png"
+                },
+                { 
+                    name: "IQ Test", 
+                    iframe: "https://www.crazygames.com/embed/obby-dumb-or-genius-iq-test",
+                    image: "https://images.crazygames.com/games/obby-dumb-or-genius-iq-test/cover-1678641755432.png"
+                }
+            ]
+        };
+
+        // 当前选中的分类
+        let currentCategory = 'action';
+
+        // 初始化页面
+        function initializePage() {
+            displayGames(currentCategory);
+            setupEventListeners();
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 分类按钮点击事件
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const category = btn.dataset.category;
+                    switchCategory(category);
+                });
+            });
+
+            // 搜索框事件
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                searchGames(searchTerm);
+            });
+
+            // 关闭游戏iframe事件
+            document.getElementById('closeGame').addEventListener('click', () => {
+                document.getElementById('gameFrame').classList.add('hidden');
+                document.getElementById('gameIframe').src = '';
+            });
+        }
+
+        // 切换分类
+        function switchCategory(category) {
+            currentCategory = category;
+            
+            // 更新按钮样式
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('category-active');
+                if (btn.dataset.category === category) {
+                    btn.classList.add('category-active');
+                }
+            });
+
+            // 显示对应分类的游戏
+            displayGames(category);
+        }
+
+        // 显示游戏列表
+        function displayGames(category) {
+            const gameList = document.getElementById('gameList');
+            gameList.innerHTML = '';
+
+            games[category].forEach(game => {
+                const gameCard = createGameCard(game);
+                gameList.appendChild(gameCard);
+            });
+        }
+
+        // 创建游戏卡片
+        function createGameCard(game) {
+            const card = document.createElement('div');
+            card.className = 'game-card bg-white rounded-lg shadow-md p-4 cursor-pointer';
+            card.innerHTML = `
+                <h3 class="text-lg font-semibold mb-2">${game.name}</h3>
+                <div class="aspect-w-16 aspect-h-9 rounded-lg mb-4 overflow-hidden">
+                    <img src="${game.image}" alt="${game.name}" class="w-full h-full object-cover">
+                </div>
+                <button class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">
+                    开始游戏
+                </button>
+            `;
+
+            card.addEventListener('click', () => {
+                if (game.iframe) {
+                    const gameFrame = document.getElementById('gameFrame');
+                    const gameIframe = document.getElementById('gameIframe');
+                    
+                    // 清除之前的iframe内容
+                    gameIframe.src = '';
+                    
+                    // 设置新的iframe源
+                    setTimeout(() => {
+                        gameIframe.src = game.iframe;
+                        gameFrame.classList.remove('hidden');
+                    }, 100);
+                }
+            });
+
+            return card;
+        }
+
+        // 搜索游戏
+        function searchGames(searchTerm) {
+            const allGames = Object.values(games).flat();
+            const filteredGames = allGames.filter(game => 
+                game.name.toLowerCase().includes(searchTerm)
+            );
+
+            const gameList = document.getElementById('gameList');
+            gameList.innerHTML = '';
+
+            filteredGames.forEach(game => {
+                const gameCard = createGameCard(game);
+                gameList.appendChild(gameCard);
+            });
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', initializePage);
+    </script>
+</body>
+</html> 
